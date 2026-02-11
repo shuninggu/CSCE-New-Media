@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snow White &mdash; A Tale Retold</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game-container">
+    <!-- Title Screen -->
+    <div id="title-screen">
+      <div class="title-content">
+        <h1 class="game-title">SNOW WHITE</h1>
+        <p class="game-subtitle">A Tale Retold</p>
+        <p class="game-tagline">A prince in exile. Seven unlikely guardians. One poisoned truth.</p>
+        <button id="start-btn" class="btn-start">BEGIN THE TALE</button>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="hidden">
+      <!-- Top Bar -->
+      <div id="top-bar">
+        <div id="scene-title"></div>
+        <div id="scene-location"></div>
+      </div>
+
+      <!-- Main Content -->
+      <div id="narrative-area">
+        <div id="character-label"></div>
+        <div id="story-text"></div>
+      </div>
+
+      <!-- Choices -->
+      <div id="choices-area"></div>
+    </div>
+
+    <!-- Ending Screen -->
+    <div id="ending-screen" class="hidden">
+      <div class="ending-content">
+        <h2 id="ending-title"></h2>
+        <div id="ending-text"></div>
+        <div id="ending-choices-summary"></div>
+        <button id="restart-btn" class="btn-start">TELL THE TALE AGAIN</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/story.js"></script>
+  <script src="js/engine.js"></script>
+</body>
+</html>

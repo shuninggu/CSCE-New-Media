@@ -1,0 +1,314 @@
+/* ===== BASE RESET & FONTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #0b0c10;
+  color: #d4c5a9;
+  font-family: 'Crimson Text', serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== GAME CONTAINER ===== */
+#game-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ===== TITLE SCREEN ===== */
+#title-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, #1a1520 0%, #0b0c10 70%);
+  animation: bgPulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+  from { background: radial-gradient(ellipse at center, #1a1520 0%, #0b0c10 70%); }
+  to   { background: radial-gradient(ellipse at center, #221828 0%, #0b0c10 70%); }
+}
+
+.title-content {
+  text-align: center;
+}
+
+.game-title {
+  font-family: 'Cinzel', serif;
+  font-size: 4rem;
+  color: #e8c170;
+  text-shadow: 0 0 20px rgba(232, 193, 112, 0.4), 0 0 60px rgba(232, 193, 112, 0.15);
+  letter-spacing: 10px;
+  margin-bottom: 16px;
+  animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  from { text-shadow: 0 0 20px rgba(232, 193, 112, 0.4), 0 0 60px rgba(232, 193, 112, 0.15); }
+  to   { text-shadow: 0 0 30px rgba(232, 193, 112, 0.7), 0 0 80px rgba(232, 193, 112, 0.3); }
+}
+
+.game-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  color: #7a6f5d;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+.game-tagline {
+  font-size: 1.05rem;
+  color: #8a7e6b;
+  font-style: italic;
+  margin-bottom: 48px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-start {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  padding: 16px 48px;
+  background: transparent;
+  color: #e8c170;
+  border: 2px solid #e8c170;
+  cursor: pointer;
+  letter-spacing: 4px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.btn-start:hover {
+  background: rgba(232, 193, 112, 0.12);
+  box-shadow: 0 0 30px rgba(232, 193, 112, 0.25), inset 0 0 30px rgba(232, 193, 112, 0.08);
+  transform: scale(1.05);
+}
+
+/* ===== GAME SCREEN ===== */
+#game-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0b0c10;
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Top Bar */
+#top-bar {
+  padding: 20px 40px;
+  border-bottom: 1px solid #2a2520;
+  background: linear-gradient(180deg, #151210 0%, #0b0c10 100%);
+}
+
+#scene-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  color: #e8c170;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+#scene-location {
+  font-size: 0.85rem;
+  color: #576574;
+  margin-top: 4px;
+  letter-spacing: 2px;
+}
+
+/* Narrative Area */
+#narrative-area {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  max-height: calc(100vh - 250px);
+}
+
+#character-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: #c9a96e;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+#character-label.narrator { color: #8a7e6b; }
+#character-label.queen    { color: #c44569; }
+#character-label.rose     { color: #e8a87c; }
+#character-label.fern     { color: #7bc67e; }
+#character-label.briar    { color: #d4a055; }
+#character-label.mirror   { color: #a29bfe; }
+
+#story-text {
+  font-size: 1.1rem;
+  line-height: 2;
+  color: #d4c5a9;
+  max-width: 800px;
+}
+
+#story-text .cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  background: #e8c170;
+  margin-left: 2px;
+  animation: blink 0.7s step-end infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* Choices Area */
+#choices-area {
+  padding: 24px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 800px;
+}
+
+.choice-btn {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.05rem;
+  padding: 16px 24px;
+  background: rgba(232, 193, 112, 0.04);
+  color: #d4c5a9;
+  border: 1px solid #2a2520;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.choice-btn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: #e8c170;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.choice-btn:hover {
+  background: rgba(232, 193, 112, 0.1);
+  border-color: #e8c170;
+  color: #fff5e0;
+  transform: translateX(8px);
+  box-shadow: 0 0 20px rgba(232, 193, 112, 0.12);
+}
+
+.choice-btn:hover::before {
+  opacity: 1;
+}
+
+.choice-btn .choice-key {
+  color: #e8c170;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+/* ===== ENDING SCREEN ===== */
+#ending-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, #1a1520 0%, #0b0c10 70%);
+}
+
+.ending-content {
+  text-align: center;
+  max-width: 700px;
+  padding: 40px;
+}
+
+#ending-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: #e8c170;
+  letter-spacing: 4px;
+  margin-bottom: 24px;
+  text-shadow: 0 0 20px rgba(232, 193, 112, 0.4);
+}
+
+#ending-text {
+  font-size: 1.1rem;
+  line-height: 2;
+  color: #d4c5a9;
+  margin-bottom: 32px;
+}
+
+#ending-choices-summary {
+  font-size: 0.85rem;
+  color: #576574;
+  margin-bottom: 40px;
+  line-height: 1.8;
+  border-top: 1px solid #2a2520;
+  padding-top: 20px;
+}
+
+#ending-choices-summary h3 {
+  font-family: 'Cinzel', serif;
+  color: #8a7e6b;
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+/* ===== SCROLLBAR ===== */
+#narrative-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+#narrative-area::-webkit-scrollbar-track {
+  background: #0b0c10;
+}
+
+#narrative-area::-webkit-scrollbar-thumb {
+  background: #2a2520;
+  border-radius: 2px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .game-title {
+    font-size: 2.2rem;
+    letter-spacing: 4px;
+  }
+
+  #narrative-area {
+    padding: 24px;
+  }
+
+  #choices-area {
+    padding: 16px 24px 24px;
+  }
+}
