@@ -119,12 +119,13 @@ CSCE-New-Media/
 
 | Member | Role |
 |--------|------|
-| Shuning Gu | Text game storyline design and framework code |
 | Praewa Pitiphat | Presentation slides and static game assets (characters, backgrounds) |
+| Sueray Wang | Live2D model animation for LLM chat system |
+| Shuning Gu | Text game storyline design and framework code |
+| Xiangbo Gao | LLM deployment and agent interaction workflow |
 | Siyuan Yang | Project report (writing, proofreading, editing) |
 | Mingyang Wu | LLM engine for real-time conversation |
-| Xiangbo Gao | LLM deployment and agent interaction workflow |
-| Sueray Wang | Live2D model animation for LLM chat system |
+
 
 ## LLM Chat Integration (Post-Game)
 
