@@ -4,10 +4,10 @@ const MirrorOracle = (() => {
   const maxPlayerReplies = 5;
   const defaultConfig = {
     apiEndpoint: '',
-    preferredModel: 'google/gemma-4-26b-a4b-it:free',
+    preferredModel: 'nvidia/nemotron-3-super-120b-a12b:free',
     fallbackModels: [
+      'google/gemma-4-26b-a4b-it:free',
       'stepfun/step-3.5-flash:free',
-      'nvidia/nemotron-3-super-120b-a12b:free',
     ],
   };
 
@@ -30,13 +30,19 @@ const MirrorOracle = (() => {
         conversation,
       });
       if (response && typeof response.message === 'string' && response.message.trim()) {
-        return response.message.trim();
+        return {
+          message: response.message.trim(),
+          source: 'llm',
+        };
       }
     } catch (error) {
       console.warn('Proxy question failed, using fallback question.', error);
     }
 
-    return getFallbackQuestion(gateId, conversation);
+    return {
+      message: getFallbackQuestion(gateId, conversation),
+      source: 'heuristic',
+    };
   }
 
   function getFallbackQuestion(gateId, conversation) {
@@ -53,9 +59,9 @@ const MirrorOracle = (() => {
         conversation,
       });
       if (remote && remote.analysis) {
-        return sanitizeAnalysis(remote.analysis);
+        return sanitizeAnalysis(remote.analysis, 'llm');
       }
-      return sanitizeAnalysis(remote);
+      return sanitizeAnalysis(remote, 'llm');
     } catch (error) {
       console.warn('Proxy analysis failed, using fallback heuristic.', error);
       return getFallbackAnalysis({ gateId, conversation });
@@ -182,7 +188,7 @@ const MirrorOracle = (() => {
       persona: inferPersona(normalized),
       traits: normalized,
       reasoning: buildReasoning(normalized),
-    });
+    }, 'heuristic');
   }
 
   function applyKeywordWeights(text, traits, keywordMap) {
@@ -216,7 +222,7 @@ const MirrorOracle = (() => {
     return descriptors.join(' ');
   }
 
-  function sanitizeAnalysis(raw) {
+  function sanitizeAnalysis(raw, source = 'heuristic') {
     const traits = raw && raw.traits ? raw.traits : {};
     const normalizedTraits = {
       trust: clamp(parseInt(traits.trust, 10) || 50, 0, 100),
@@ -234,6 +240,7 @@ const MirrorOracle = (() => {
       reasoning: typeof raw?.reasoning === 'string' && raw.reasoning.trim()
         ? raw.reasoning.trim()
         : buildReasoning(normalizedTraits),
+      source,
     };
   }
 

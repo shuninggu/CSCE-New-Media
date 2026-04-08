@@ -40,6 +40,14 @@ export default {
       return json({ error: 'Missing gateId, conversation, or mode' }, 400, env);
     }
 
+    if (!env.OPENROUTER_API_KEY) {
+      return json(
+        { error: 'Missing OPENROUTER_API_KEY in Worker environment. Use `wrangler secret put OPENROUTER_API_KEY` or create a local `.dev.vars` file.' },
+        500,
+        env
+      );
+    }
+
     const gate = gatePrompts[gateId];
     if (!gate) {
       return json({ error: 'Unknown gateId' }, 400, env);
@@ -96,7 +104,7 @@ async function analyzeConversation(model, gate, conversation, env) {
 
   const data = await callOpenRouter(payload, env);
   const content = data.choices?.[0]?.message?.content || '{}';
-  return JSON.parse(content);
+  return normalizeAnalysis(JSON.parse(content));
 }
 
 async function callOpenRouter(payload, env) {
@@ -135,4 +143,36 @@ function corsHeaders(env) {
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
+}
+
+function normalizeAnalysis(raw) {
+  const traitsSource = raw?.traits && typeof raw.traits === 'object' ? raw.traits : null;
+  const persona = typeof raw?.persona === 'string' ? raw.persona.trim() : '';
+  const reasoning = typeof raw?.reasoning === 'string' ? raw.reasoning.trim() : '';
+
+  if (!traitsSource || !persona || !reasoning) {
+    throw new Error('Malformed analysis payload from model.');
+  }
+
+  const traits = {
+    trust: normalizeTraitValue(traitsSource.trust),
+    caution: normalizeTraitValue(traitsSource.caution),
+    honesty: normalizeTraitValue(traitsSource.honesty),
+    self_preservation: normalizeTraitValue(traitsSource.self_preservation),
+    cooperation: normalizeTraitValue(traitsSource.cooperation),
+  };
+
+  return {
+    persona,
+    reasoning,
+    traits,
+  };
+}
+
+function normalizeTraitValue(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    throw new Error('Malformed trait score from model.');
+  }
+  return Math.max(0, Math.min(100, Math.round(parsed)));
 }

@@ -30,6 +30,7 @@ Deployment flow:
 2. Deploy the Worker with `wrangler`
 3. Set `OPENROUTER_API_KEY` with `wrangler secret put OPENROUTER_API_KEY`
 4. Update `js/runtime-config.js` to point to the deployed Worker URL
+5. Recommended default model for better free-tier reliability: `nvidia/nemotron-3-super-120b-a12b:free`
 
 ## Characters
 

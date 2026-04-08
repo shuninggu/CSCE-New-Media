@@ -205,8 +205,12 @@ const GameEngine = (() => {
         scene,
         conversation: state.chatHistory,
       });
-      state.chatHistory.push({ role: 'assistant', content: nextQuestion });
-      updateMirrorStatus(`Exchange ${userReplyCount + 1} of ${MirrorOracle.maxPlayerReplies}.`);
+      state.chatHistory.push({ role: 'assistant', content: nextQuestion.message });
+      if (nextQuestion.source === 'llm') {
+        updateMirrorStatus('The Mirror answers with a brighter silver than before.');
+      } else {
+        updateMirrorStatus('The Mirror is silent. Falling back to its old riddles.', true);
+      }
     } catch (error) {
       console.error('Mirror question failed:', error);
       state.mirrorError = 'The Mirror is silent. Falling back to its old riddles.';
@@ -237,7 +241,11 @@ const GameEngine = (() => {
       renderJudgment(analysis);
       state.chatPhaseActive = false;
       renderChoices(StoryData.scenes[state.currentScene]);
-      updateMirrorStatus('Judgment complete. Your available paths have changed.');
+      if (analysis.source === 'llm') {
+        updateMirrorStatus('The Mirror speaks in a clearer voice, as if the glass remembered you.');
+      } else {
+        updateMirrorStatus('Judgment complete via fallback analysis.', true);
+      }
     } catch (error) {
       console.error('Mirror analysis failed:', error);
       const fallback = MirrorOracle.getFallbackAnalysis({

@@ -28,6 +28,28 @@ Use this Cloudflare Worker as the backend for a GitHub Pages frontend.
 5. Deploy:
    `wrangler deploy`
 
+## Local development
+
+For local `wrangler dev`, the easiest option is to create a file named `.dev.vars` in this `proxy/` directory:
+
+```bash
+cp .dev.vars.example .dev.vars
+```
+
+Then put your local test key in `.dev.vars`:
+
+```text
+OPENROUTER_API_KEY=sk-or-v1-...
+```
+
+Then start the Worker locally:
+
+```bash
+wrangler dev --port 8787 --host 127.0.0.1
+```
+
+If you see `Missing Authentication header` from OpenRouter, it means the Worker did not receive `OPENROUTER_API_KEY`.
+
 After deploy, your Worker endpoint will look like:
 
 `https://mirror-gate-worker.<subdomain>.workers.dev/api/mirror-chat`
@@ -43,10 +65,10 @@ Edit `js/runtime-config.js` and set:
 ```js
 window.MirrorRuntimeConfig = {
   apiEndpoint: 'https://mirror-gate-worker.your-subdomain.workers.dev/api/mirror-chat',
-  preferredModel: 'google/gemma-4-26b-a4b-it:free',
+  preferredModel: 'nvidia/nemotron-3-super-120b-a12b:free',
   fallbackModels: [
+    'google/gemma-4-26b-a4b-it:free',
     'stepfun/step-3.5-flash:free',
-    'nvidia/nemotron-3-super-120b-a12b:free',
   ],
 };
 ```
