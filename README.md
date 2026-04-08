@@ -10,6 +10,27 @@ A gender-swapped retelling of Snow White. The player is **Prince Alden**, a male
 
 Open `index.html` in any modern browser. No build tools or dependencies required.
 
+## Deployment
+
+### GitHub Pages frontend
+
+The game can be deployed directly as a static GitHub Pages site.
+
+Important:
+- Do **not** put the OpenRouter API key in the frontend
+- `js/runtime-config.js` should contain only the public Cloudflare Worker URL
+- The API key belongs only in the Worker secret store
+
+### Cloudflare Worker backend
+
+This repo includes a Worker template in [`proxy/`](./proxy) for `POST /api/mirror-chat`.
+
+Deployment flow:
+1. Deploy the frontend to GitHub Pages
+2. Deploy the Worker with `wrangler`
+3. Set `OPENROUTER_API_KEY` with `wrangler secret put OPENROUTER_API_KEY`
+4. Update `js/runtime-config.js` to point to the deployed Worker URL
+
 ## Characters
 
 | Character | Role | Description |
@@ -103,8 +124,13 @@ CSCE-New-Media/
 ├── css/
 │   └── style.css       # Fantasy-themed dark UI (Cinzel + Crimson Text fonts)
 ├── js/
-│   ├── engine.js       # Game engine (state, typewriter effect, scene transitions)
+│   ├── engine.js       # Game engine (state, scene transitions, Mirror gate flow)
+│   ├── mirror.js       # Magic Mirror chat + analysis + choice gating
+│   ├── runtime-config.js # Public Worker endpoint config
 │   └── story.js        # All story data (scenes, dialogue, choices, endings)
+├── proxy/
+│   ├── cloudflare-worker.js # OpenRouter proxy for GitHub Pages
+│   └── wrangler.toml   # Worker config template
 └── README.md
 ```
 
@@ -127,6 +153,12 @@ CSCE-New-Media/
 | Mingyang Wu | LLM engine for real-time conversation |
 
 
-## LLM Chat Integration (Post-Game)
+## LLM Chat Integration
 
-After completing any ending, players transition to an LLM-powered chat system (Qwen3 via vLLM) where they can have open-ended conversations with Rose, Fern, Briar, Queen Ravenna, or the Magic Mirror.
+The current version adds a `Magic Mirror` chatbox before major branch points.
+
+- The player talks to one NPC: the Magic Mirror
+- The Mirror analyzes the dialogue into trait scores
+- Trait thresholds lock or unlock later choices
+- The frontend is static and can run on GitHub Pages
+- The real LLM call should go through the Cloudflare Worker proxy in [`proxy/`](./proxy)

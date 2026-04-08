@@ -1,0 +1,7 @@
+name = "mirror-gate-worker"
+main = "cloudflare-worker.js"
+compatibility_date = "2026-04-07"
+
+[vars]
+SITE_URL = "https://your-site.github.io"
+ALLOWED_ORIGIN = "https://your-site.github.io"

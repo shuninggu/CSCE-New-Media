@@ -1,22 +1,9 @@
 // ===== STORY DATA =====
 // Snow White and the Three Dwarfs — A Tale Retold
 // Male Snow White (Prince Alden), Evil Queen Ravenna, Three Female Dwarfs
-//
-// Characters (3 dwarfs — fewer character portraits needed):
-//   Rose  — the leader, fierce red-haired warrior with green eyes, carries a pickaxe
-//   Fern  — the healer, gentle and observant, knows every herb in the forest
-//   Briar — the blacksmith, short-tempered and suspicious, but fiercely loyal
-//
-// Other characters:
-//   Queen Ravenna — the stepmother, vain and ruthless
-//   The Magic Mirror — ancient, cryptic, bound to speak only truth
 
 const StoryData = {
   scenes: {
-
-    // ============================================================
-    // SCENE 1: THE FLIGHT
-    // ============================================================
     scene_1: {
       id: 'scene_1',
       title: 'Chapter 1 — The Fairest',
@@ -48,14 +35,14 @@ const StoryData = {
       ],
     },
 
-    // ============================================================
-    // SCENE 2A: INTO THE WOODS (sought Marta's help)
-    // ============================================================
     scene_2a: {
       id: 'scene_2a',
       title: 'Chapter 2 — Into the Woods',
       location: 'The Darkwood Forest — Dawn',
       character: 'narrator',
+      chatGateId: 'forest_judgment',
+      defaultUnlockedChoiceId: 'offer_deal',
+      mirrorIntro: "Before you answer the dwarfs, the morning dew gathers into a silver face. The Magic Mirror appears in the air, studying whether you are about to seek trust, protection, or advantage.",
       text: [
         { line: "Old Marta doesn't hesitate. She wraps bread and a waterskin into a bundle, presses a small hunting knife into your hands, and leads you through a passage behind the kitchen hearth that even the guards don't know about." },
         { speaker: 'Marta', line: "The Darkwood is dangerous, my boy, but the Queen is worse. Follow the stream south. There are people who live deep in the forest — miners, they say. Strange folk, but good. Find them if you can." },
@@ -72,30 +59,44 @@ const StoryData = {
           text: 'Tell them everything — the Queen, the Mirror, the Huntsman',
           next: 'scene_3_trust',
           flag: 'told_truth',
+          requires: {
+            honesty: { min: 60 },
+            trust: { min: 45 },
+          },
+          lockReason: 'Blocked: the Mirror detects too much evasiveness to risk full confession.',
         },
         {
           id: 'hide_identity',
           text: 'Say you are a lost traveler — keep your royal identity hidden',
           next: 'scene_3_cautious',
           flag: 'hid_identity',
+          requires: {
+            caution: { min: 58 },
+            self_preservation: { min: 55 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little caution for a convincing deception.',
         },
         {
           id: 'offer_deal',
           text: '"Let me stay and I\'ll earn my keep. I can cook, clean, and mend things."',
           next: 'scene_3_deal',
           flag: 'offered_deal',
+          requires: {
+            cooperation: { min: 50 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little cooperative intent for a mutual bargain.',
         },
       ],
     },
 
-    // ============================================================
-    // SCENE 2B: INTO THE WOODS (fled alone)
-    // ============================================================
     scene_2b: {
       id: 'scene_2b',
       title: 'Chapter 2 — Into the Woods',
       location: 'The Darkwood Forest — Dawn',
       character: 'narrator',
+      chatGateId: 'forest_judgment',
+      defaultUnlockedChoiceId: 'offer_deal',
+      mirrorIntro: "As the dwarfs' suspicion closes around you, a dark pane flashes above the hearth. The Magic Mirror interrupts, intent on judging whether fear or honesty will rule your answer.",
       text: [
         { line: "You run barefoot through the eastern gate, past the sleeping guards, and into the Darkwood. Branches claw at your nightclothes. Roots trip you in the dark. But you don't stop." },
         { line: "By dawn, you have no idea where you are. The forest is ancient and vast — the kind of place where people disappear. Your feet are bleeding, you have nothing to eat, and the only sound is birdsong and your own ragged breathing." },
@@ -111,30 +112,44 @@ const StoryData = {
           text: 'Tell them everything — you\'re the Prince and the Queen wants you dead',
           next: 'scene_3_trust',
           flag: 'told_truth',
+          requires: {
+            honesty: { min: 60 },
+            trust: { min: 45 },
+          },
+          lockReason: 'Blocked: the Mirror detects too much evasiveness to risk full confession.',
         },
         {
           id: 'hide_identity',
           text: '"I\'m just a traveler who got lost. Please, I mean no harm."',
           next: 'scene_3_cautious',
           flag: 'hid_identity',
+          requires: {
+            caution: { min: 58 },
+            self_preservation: { min: 55 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little caution for a convincing deception.',
         },
         {
           id: 'offer_deal',
           text: '"I\'m sorry about the food. Let me repay you — I\'ll work for my stay."',
           next: 'scene_3_deal',
           flag: 'offered_deal',
+          requires: {
+            cooperation: { min: 50 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little cooperative intent for a mutual bargain.',
         },
       ],
     },
 
-    // ============================================================
-    // SCENE 3: LIFE IN THE COTTAGE (told the truth)
-    // ============================================================
     scene_3_trust: {
       id: 'scene_3_trust',
       title: 'Chapter 3 — The Three',
       location: 'The Dwarfs\' Cottage — Evening',
       character: 'narrator',
+      chatGateId: 'queen_judgment',
+      defaultUnlockedChoiceId: 'set_trap',
+      mirrorIntro: "That night, the firelight bends into polished glass. The Magic Mirror returns to weigh what kind of courage you will choose when the Queen reaches the cottage.",
       text: [
         { line: "You tell them everything. The words pour out — your father's death, Ravenna's cruelty, the Mirror's judgment, the Huntsman sent to kill you. By the end, the cottage is silent." },
         { line: "The three dwarfs exchange glances. Rose, the leader — fierce and quick-tempered, but fair. Fern, the healer — quiet, gentle, with dark eyes that seem to see right through you. And Briar, the blacksmith — arms folded, jaw set, trusting nothing and no one." },
@@ -154,30 +169,44 @@ const StoryData = {
           text: '"I\'m done running. I\'ll go out and face her myself."',
           next: 'scene_4_confront',
           flag: 'chose_confront',
+          requires: {
+            caution: { max: 72 },
+            self_preservation: { max: 50 },
+          },
+          lockReason: 'Blocked: the Mirror detects too much caution or self-protection for a lone confrontation.',
         },
         {
           id: 'set_trap',
           text: '"Let her come. We set a trap — together."',
           next: 'scene_4_trap',
           flag: 'chose_trap',
+          requires: {
+            cooperation: { min: 55 },
+            caution: { min: 45 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little teamwork or planning for a coordinated trap.',
         },
         {
           id: 'flee_again',
           text: '"I won\'t put you in danger. I\'ll leave and draw her away."',
           next: 'scene_4_sacrifice',
           flag: 'chose_flee',
+          requires: {
+            self_preservation: { min: 60 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little survival instinct to choose flight.',
         },
       ],
     },
 
-    // ============================================================
-    // SCENE 3: LIFE IN THE COTTAGE (hid identity)
-    // ============================================================
     scene_3_cautious: {
       id: 'scene_3_cautious',
       title: 'Chapter 3 — The Three',
       location: 'The Dwarfs\' Cottage — Evening',
       character: 'narrator',
+      chatGateId: 'queen_judgment',
+      defaultUnlockedChoiceId: 'set_trap',
+      mirrorIntro: "As the cottage falls silent, the soot-black kettle reflects a face not your own. The Magic Mirror emerges again, judging whether you will answer danger with trust, strategy, or flight.",
       text: [
         { line: "You tell them you're a traveler who got lost. The dwarfs are suspicious but practical — an extra pair of hands is useful, especially tall ones that can reach high shelves." },
         { line: "You learn who they are. Rose, the leader — sharp-tongued but fair, she runs the household and the mine with equal authority. Fern, the healer — soft-spoken and observant, she tends a garden of medicinal herbs and always seems to know when you're lying. And Briar, the blacksmith — stocky, blunt, and distrustful, she watches your every move with narrowed eyes." },
@@ -197,30 +226,44 @@ const StoryData = {
           text: 'Confess everything and go out to face the old woman alone',
           next: 'scene_4_confront',
           flag: 'chose_confront',
+          requires: {
+            caution: { max: 72 },
+            self_preservation: { max: 50 },
+          },
+          lockReason: 'Blocked: the Mirror detects too much caution or self-protection for a lone confrontation.',
         },
         {
           id: 'set_trap',
           text: 'Tell the truth at last and ask them to help you set a trap',
           next: 'scene_4_trap',
           flag: 'chose_trap',
+          requires: {
+            cooperation: { min: 55 },
+            caution: { min: 45 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little teamwork or planning for a coordinated trap.',
         },
         {
           id: 'flee_again',
           text: '"You\'re right — I\'ve put you all in danger. I\'ll leave now and lead her away."',
           next: 'scene_4_sacrifice',
           flag: 'chose_flee',
+          requires: {
+            self_preservation: { min: 60 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little survival instinct to choose flight.',
         },
       ],
     },
 
-    // ============================================================
-    // SCENE 3: LIFE IN THE COTTAGE (offered deal)
-    // ============================================================
     scene_3_deal: {
       id: 'scene_3_deal',
       title: 'Chapter 3 — The Three',
       location: 'The Dwarfs\' Cottage — Evening',
       character: 'narrator',
+      chatGateId: 'queen_judgment',
+      defaultUnlockedChoiceId: 'set_trap',
+      mirrorIntro: "In the polished iron of Briar's forge, the Magic Mirror awakens once more. It wants to know whether the bond you built in this cottage will make you stand, scheme, or run when the Queen arrives.",
       text: [
         { line: "Your offer lands well. Rose lowers her pickaxe — slightly — and the others look at each other." },
         { speaker: 'Rose', line: "Can you actually cook? Because Briar has been making the same stew for four years and we're all losing our minds." },
@@ -241,25 +284,36 @@ const StoryData = {
           text: '"She\'s here for me. I\'m Prince Alden, and that woman is the Queen. I\'ll face her."',
           next: 'scene_4_confront',
           flag: 'chose_confront',
+          requires: {
+            caution: { max: 72 },
+            self_preservation: { max: 50 },
+          },
+          lockReason: 'Blocked: the Mirror detects too much caution or self-protection for a lone confrontation.',
         },
         {
           id: 'set_trap',
           text: '"I\'m the Prince, and she wants me dead. But if we work together, we can stop her."',
           next: 'scene_4_trap',
           flag: 'chose_trap',
+          requires: {
+            cooperation: { min: 55 },
+            caution: { min: 45 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little teamwork or planning for a coordinated trap.',
         },
         {
           id: 'flee_again',
           text: '"I\'m the one she wants. I\'ll leave now — you\'ve been too kind for me to bring this on you."',
           next: 'scene_4_sacrifice',
           flag: 'chose_flee',
+          requires: {
+            self_preservation: { min: 60 },
+          },
+          lockReason: 'Blocked: the Mirror detects too little survival instinct to choose flight.',
         },
       ],
     },
 
-    // ============================================================
-    // SCENE 4: THE CONFRONTATION (face the Queen)
-    // ============================================================
     scene_4_confront: {
       id: 'scene_4_confront',
       title: 'Chapter 4 — The Poisoned Apple',
@@ -292,9 +346,6 @@ const StoryData = {
       ],
     },
 
-    // ============================================================
-    // SCENE 4: THE TRAP (set a trap together)
-    // ============================================================
     scene_4_trap: {
       id: 'scene_4_trap',
       title: 'Chapter 4 — The Poisoned Apple',
@@ -329,9 +380,6 @@ const StoryData = {
       ],
     },
 
-    // ============================================================
-    // SCENE 4: THE SACRIFICE (fled to protect the dwarfs)
-    // ============================================================
     scene_4_sacrifice: {
       id: 'scene_4_sacrifice',
       title: 'Chapter 4 — The Poisoned Apple',
@@ -366,9 +414,6 @@ const StoryData = {
     },
   },
 
-  // ============================================================
-  // ENDINGS
-  // ============================================================
   endings: {
     ending_courage: {
       id: 'ending_courage',
@@ -388,4 +433,76 @@ const StoryData = {
       text: "You don't go back to the castle. Not yet. Maybe not ever.\n\nInstead, you stay in the cottage in the Darkwood, with three women who chose you — not because you were a prince, but because you peeled potatoes without complaining and fixed the roof when it leaked.\n\nThe Queen remains on her throne, but her power fades like a fire with no fuel. Without an enemy to hunt, her obsession turns inward. The Mirror, they say, eventually stops answering her questions altogether.\n\nYou become a different person in the forest. Not a prince — something better. A member of a family you chose, doing work that matters, surrounded by people who see you as you truly are.\n\nRose teaches you to swing a pickaxe. Fern teaches you which herbs heal and which ones harm. Briar teaches you to forge iron — and, grudgingly, admits your cooking is better than hers.\n\nIn the end, the fairest thing about you was never your face. It was your heart — and the three women who helped you find it.",
     },
   },
+
+  mirrorGates: {
+    forest_judgment: {
+      title: 'Mirror Interruption — First Impressions',
+      analysisLabel: 'How the Mirror believes the dwarfs will read you',
+      openingQuestion: 'When strangers hold steel at your throat, what matters most to you: safety, honesty, or earning their goodwill?',
+      followUpQuestions: [
+        'If telling the whole truth made you vulnerable, would you still do it?',
+        'Would you rather gain shelter through trust or through usefulness?',
+        'When fear rises, do you hide what matters or share it?',
+        'If one of the dwarfs doubted you, how would you answer her suspicion?'
+      ],
+      fallbackProfiles: {
+        honest: [
+          'Safety matters, but I would rather tell enough truth to build real trust.',
+          'Yes. If I lie now, I only make myself more dangerous to them.',
+          'I would rather earn shelter by being honest and useful together.',
+          'Fear makes me careful, but not deceitful.',
+          'I would answer directly and show that I am willing to work with them.'
+        ],
+        guarded: [
+          'Safety comes first. I cannot trust strangers with everything.',
+          'No. Truth is a luxury if it gets me killed.',
+          'Usefulness is safer than trust. People help what benefits them.',
+          'When fear rises, I hide what can be used against me.',
+          'I would keep my story narrow and reveal only what protects me.'
+        ],
+        manipulative: [
+          'Goodwill matters only if it gives me leverage.',
+          'Truth is useful when it helps me control the room.',
+          'I would say whatever wins shelter fastest.',
+          'Fear is for people who hesitate. I would turn suspicion back on them.',
+          'I would offer a bargain that makes refusal costly.'
+        ]
+      }
+    },
+
+    queen_judgment: {
+      title: 'Mirror Interruption — The Queen Draws Near',
+      analysisLabel: 'How the Mirror believes you will respond to the Queen',
+      openingQuestion: 'When the Queen finally reaches this cottage, do you imagine yourself standing firm, planning with others, or disappearing before she can strike?',
+      followUpQuestions: [
+        'Is courage acting alone, or choosing the right allies?',
+        'Would you risk yourself first to protect the dwarfs?',
+        'Do you trust the dwarfs enough to fight beside them?',
+        'If a trap offered the safest path, would you still crave a direct confrontation?'
+      ],
+      fallbackProfiles: {
+        honest: [
+          'I would rather plan with the dwarfs than force them to rescue me.',
+          'Courage is choosing the wisest path, not the loudest one.',
+          'Yes, I would risk myself, but not carelessly if teamwork helps.',
+          'I trust them enough to stand together.',
+          'If a trap protects everyone, I would choose the trap.'
+        ],
+        guarded: [
+          'If the Queen comes, the safest move may be to disappear first.',
+          'Courage is surviving long enough to choose your own future.',
+          'I would protect them by drawing danger away from the cottage.',
+          'Trust has limits when a queen is hunting you.',
+          'I would leave before I let them become targets.'
+        ],
+        manipulative: [
+          'I want to look the Queen in the eye and make her break first.',
+          'Allies matter, but only if they follow my lead.',
+          'Risk is useful if it wins power and fear.',
+          'I trust them to be useful, not equal.',
+          'A trap is fine if I remain the one in control.'
+        ]
+      }
+    }
+  }
 };

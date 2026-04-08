@@ -1,36 +1,48 @@
 // ===== GAME ENGINE =====
 
 const GameEngine = (() => {
-  // --- State ---
   const state = {
     currentScene: null,
-    choiceHistory: [],  // [{sceneId, choiceId, choiceText}]
-    flags: {},          // arbitrary flags set by choices
+    choiceHistory: [],
+    flags: {},
+    chatPhaseActive: false,
+    currentGateId: null,
+    chatHistory: [],
+    analysisResultByGate: {},
+    mirrorBusy: false,
+    mirrorError: '',
   };
 
-  // --- DOM References ---
   const dom = {
-    titleScreen:   document.getElementById('title-screen'),
-    gameScreen:    document.getElementById('game-screen'),
-    endingScreen:  document.getElementById('ending-screen'),
-    startBtn:      document.getElementById('start-btn'),
-    restartBtn:    document.getElementById('restart-btn'),
-    sceneTitle:    document.getElementById('scene-title'),
+    titleScreen: document.getElementById('title-screen'),
+    gameScreen: document.getElementById('game-screen'),
+    endingScreen: document.getElementById('ending-screen'),
+    startBtn: document.getElementById('start-btn'),
+    restartBtn: document.getElementById('restart-btn'),
+    sceneTitle: document.getElementById('scene-title'),
     sceneLocation: document.getElementById('scene-location'),
-    characterLabel:document.getElementById('character-label'),
-    storyText:     document.getElementById('story-text'),
-    choicesArea:   document.getElementById('choices-area'),
-    endingTitle:   document.getElementById('ending-title'),
-    endingText:    document.getElementById('ending-text'),
+    characterLabel: document.getElementById('character-label'),
+    storyText: document.getElementById('story-text'),
+    choicesArea: document.getElementById('choices-area'),
+    endingTitle: document.getElementById('ending-title'),
+    endingText: document.getElementById('ending-text'),
     endingSummary: document.getElementById('ending-choices-summary'),
+    mirrorPanel: document.getElementById('mirror-panel'),
+    mirrorGateTitle: document.getElementById('mirror-gate-title'),
+    mirrorStatus: document.getElementById('mirror-status'),
+    mirrorChatLog: document.getElementById('mirror-chat-log'),
+    mirrorInput: document.getElementById('mirror-input'),
+    mirrorSendBtn: document.getElementById('mirror-send-btn'),
+    mirrorJudgment: document.getElementById('mirror-judgment'),
+    mirrorPersona: document.getElementById('mirror-persona'),
+    mirrorReasoning: document.getElementById('mirror-reasoning'),
+    mirrorTraits: document.getElementById('mirror-traits'),
   };
 
-  // --- Typewriter ---
   let typewriterTimer = null;
-  const CHAR_DELAY = 20; // ms per character
+  const CHAR_DELAY = 20;
 
   function typewrite(element, text, callback) {
-    // Clear any running typewriter
     if (typewriterTimer) clearInterval(typewriterTimer);
 
     element.innerHTML = '';
@@ -40,20 +52,17 @@ const GameEngine = (() => {
     let i = 0;
     typewriterTimer = setInterval(() => {
       if (i < text.length) {
-        // Handle newlines
         if (text[i] === '\n') {
           element.appendChild(document.createElement('br'));
         } else {
           element.appendChild(document.createTextNode(text[i]));
         }
-        // Keep cursor at end
         if (element.contains(cursor)) element.removeChild(cursor);
         element.appendChild(cursor);
         i++;
       } else {
         clearInterval(typewriterTimer);
         typewriterTimer = null;
-        // Remove cursor after a short pause
         setTimeout(() => {
           if (element.contains(cursor)) element.removeChild(cursor);
           if (callback) callback();
@@ -62,7 +71,6 @@ const GameEngine = (() => {
     }, CHAR_DELAY);
   }
 
-  // --- Scene Rendering ---
   function showScreen(screen) {
     dom.titleScreen.classList.add('hidden');
     dom.gameScreen.classList.add('hidden');
@@ -78,91 +86,264 @@ const GameEngine = (() => {
     }
 
     state.currentScene = sceneId;
-    showScreen(dom.gameScreen);
+    state.chatPhaseActive = false;
+    state.currentGateId = null;
+    state.chatHistory = [];
+    state.mirrorBusy = false;
+    state.mirrorError = '';
 
-    // Update top bar
+    showScreen(dom.gameScreen);
+    hideMirrorPanel();
+
     dom.sceneTitle.textContent = scene.title;
     dom.sceneLocation.textContent = scene.location;
-
-    // Update character label
     dom.characterLabel.textContent = scene.character.toUpperCase();
     dom.characterLabel.className = scene.character;
-
-    // Clear choices while typing
     dom.choicesArea.innerHTML = '';
 
-    // Build full scene text from dialogue lines
     const fullText = buildSceneText(scene);
 
-    // Typewrite the text, then show choices
     typewrite(dom.storyText, fullText, () => {
-      renderChoices(scene.choices);
+      if (scene.chatGateId) {
+        beginMirrorGate(scene);
+      } else {
+        renderChoices(scene);
+      }
     });
   }
 
   function buildSceneText(scene) {
-    if (typeof scene.text === 'string') {
-      return scene.text;
-    }
-    // Support array of dialogue lines
+    if (typeof scene.text === 'string') return scene.text;
     if (Array.isArray(scene.text)) {
-      return scene.text.map(line => {
-        if (line.speaker) {
-          return `[${line.speaker.toUpperCase()}]: ${line.line}`;
-        }
+      return scene.text.map((line) => {
+        if (line.speaker) return `[${line.speaker.toUpperCase()}]: ${line.line}`;
         return line.line || line;
       }).join('\n\n');
     }
     return '';
   }
 
-  function renderChoices(choices) {
+  function beginMirrorGate(scene) {
+    const gateId = scene.chatGateId;
+    const gate = StoryData.mirrorGates[gateId];
+
+    state.chatPhaseActive = true;
+    state.currentGateId = gateId;
+    state.chatHistory = MirrorOracle.createOpeningConversation(scene);
+    state.mirrorError = '';
+
+    dom.choicesArea.innerHTML = '';
+    dom.mirrorGateTitle.textContent = gate.title;
+    dom.mirrorInput.value = '';
+    dom.mirrorInput.disabled = false;
+    dom.mirrorSendBtn.disabled = false;
+    dom.mirrorJudgment.classList.add('hidden');
+    updateMirrorStatus('Speak with the Mirror. Five replies will trigger its judgment.');
+    renderMirrorChat();
+    showMirrorPanel();
+  }
+
+  function showMirrorPanel() {
+    dom.mirrorPanel.classList.remove('hidden');
+  }
+
+  function hideMirrorPanel() {
+    dom.mirrorPanel.classList.add('hidden');
+    dom.mirrorJudgment.classList.add('hidden');
+    dom.mirrorChatLog.innerHTML = '';
+    dom.mirrorStatus.textContent = '';
+    dom.mirrorInput.value = '';
+    dom.mirrorInput.disabled = false;
+    dom.mirrorSendBtn.disabled = false;
+  }
+
+  function renderMirrorChat() {
+    dom.mirrorChatLog.innerHTML = '';
+    state.chatHistory.forEach((entry) => {
+      const item = document.createElement('div');
+      item.className = `mirror-message ${entry.role}`;
+      item.innerHTML = `
+        <div class="mirror-speaker">${entry.role === 'assistant' ? 'Magic Mirror' : 'Alden'}</div>
+        <div>${entry.content}</div>
+      `;
+      dom.mirrorChatLog.appendChild(item);
+    });
+    dom.mirrorChatLog.scrollTop = dom.mirrorChatLog.scrollHeight;
+  }
+
+  function updateMirrorStatus(text, isError = false) {
+    dom.mirrorStatus.textContent = text;
+    dom.mirrorStatus.classList.toggle('error', isError);
+  }
+
+  async function handleMirrorSend() {
+    if (state.mirrorBusy || !state.chatPhaseActive) return;
+
+    const input = dom.mirrorInput.value.trim();
+    if (!input) return;
+
+    state.chatHistory.push({ role: 'user', content: input });
+    dom.mirrorInput.value = '';
+    renderMirrorChat();
+
+    const userReplyCount = state.chatHistory.filter((entry) => entry.role === 'user').length;
+    if (userReplyCount >= MirrorOracle.maxPlayerReplies) {
+      await finalizeMirrorJudgment();
+      return;
+    }
+
+    state.mirrorBusy = true;
+    dom.mirrorSendBtn.disabled = true;
+    dom.mirrorInput.disabled = true;
+    updateMirrorStatus('The Mirror studies your words...');
+
+    const scene = StoryData.scenes[state.currentScene];
+
+    try {
+      const nextQuestion = await MirrorOracle.getNextQuestion({
+        gateId: state.currentGateId,
+        scene,
+        conversation: state.chatHistory,
+      });
+      state.chatHistory.push({ role: 'assistant', content: nextQuestion });
+      updateMirrorStatus(`Exchange ${userReplyCount + 1} of ${MirrorOracle.maxPlayerReplies}.`);
+    } catch (error) {
+      console.error('Mirror question failed:', error);
+      state.mirrorError = 'The Mirror is silent. Falling back to its old riddles.';
+      const fallbackQuestion = MirrorOracle.getFallbackQuestion(state.currentGateId, state.chatHistory);
+      state.chatHistory.push({ role: 'assistant', content: fallbackQuestion });
+      updateMirrorStatus(state.mirrorError, true);
+    } finally {
+      state.mirrorBusy = false;
+      dom.mirrorSendBtn.disabled = false;
+      dom.mirrorInput.disabled = false;
+      dom.mirrorInput.focus();
+      renderMirrorChat();
+    }
+  }
+
+  async function finalizeMirrorJudgment() {
+    state.mirrorBusy = true;
+    dom.mirrorSendBtn.disabled = true;
+    dom.mirrorInput.disabled = true;
+    updateMirrorStatus('The Mirror is judging your nature...');
+
+    try {
+      const analysis = await MirrorOracle.analyzeConversation({
+        gateId: state.currentGateId,
+        conversation: state.chatHistory,
+      });
+      state.analysisResultByGate[state.currentGateId] = analysis;
+      renderJudgment(analysis);
+      state.chatPhaseActive = false;
+      renderChoices(StoryData.scenes[state.currentScene]);
+      updateMirrorStatus('Judgment complete. Your available paths have changed.');
+    } catch (error) {
+      console.error('Mirror analysis failed:', error);
+      const fallback = MirrorOracle.getFallbackAnalysis({
+        gateId: state.currentGateId,
+        conversation: state.chatHistory,
+      });
+      state.analysisResultByGate[state.currentGateId] = fallback;
+      renderJudgment(fallback);
+      state.chatPhaseActive = false;
+      renderChoices(StoryData.scenes[state.currentScene]);
+      updateMirrorStatus('Judgment complete via fallback analysis.', true);
+    } finally {
+      state.mirrorBusy = false;
+      dom.mirrorSendBtn.disabled = true;
+      dom.mirrorInput.disabled = true;
+    }
+  }
+
+  function renderJudgment(analysis) {
+    const gate = StoryData.mirrorGates[state.currentGateId];
+    dom.mirrorPersona.textContent = `${gate.analysisLabel}: ${formatPersona(analysis.persona)}`;
+    dom.mirrorReasoning.textContent = analysis.reasoning;
+    dom.mirrorTraits.innerHTML = '';
+
+    Object.entries(analysis.traits).forEach(([trait, value]) => {
+      const row = document.createElement('div');
+      row.className = 'trait-row';
+      row.innerHTML = `
+        <span>${formatTraitName(trait)}</span>
+        <div class="trait-bar"><div class="trait-fill" style="width: ${value}%"></div></div>
+        <strong>${value}</strong>
+      `;
+      dom.mirrorTraits.appendChild(row);
+    });
+
+    dom.mirrorJudgment.classList.remove('hidden');
+  }
+
+  function resolveChoices(scene) {
+    const baseChoices = scene.choices.filter((choice) => {
+      if (!choice.condition) return true;
+      return choice.condition(state.flags);
+    });
+
+    const analysis = scene.chatGateId ? state.analysisResultByGate[scene.chatGateId] : null;
+    const resolved = baseChoices.map((choice) => {
+      if (!analysis) {
+        return { ...choice, isAvailable: true, gateReason: '' };
+      }
+      const result = MirrorOracle.evaluateChoice(choice, analysis);
+      return { ...choice, isAvailable: result.allowed, gateReason: result.reason };
+    });
+
+    if (analysis && !resolved.some((choice) => choice.isAvailable)) {
+      const fallbackChoiceId = scene.defaultUnlockedChoiceId || resolved[0]?.id;
+      return resolved.map((choice) => {
+        if (choice.id === fallbackChoiceId) {
+          return {
+            ...choice,
+            isAvailable: true,
+            gateReason: 'Unlocked by fallback to keep the story moving.',
+            fallbackUnlock: true,
+          };
+        }
+        return choice;
+      });
+    }
+
+    return resolved;
+  }
+
+  function renderChoices(scene) {
     dom.choicesArea.innerHTML = '';
 
-    // If this is a dynamic scene, resolve the choices
-    const resolvedChoices = resolveChoices(choices);
+    const resolvedChoices = resolveChoices(scene);
 
     resolvedChoices.forEach((choice, index) => {
       const btn = document.createElement('button');
-      btn.className = 'choice-btn';
-      const keyLabel = String.fromCharCode(65 + index); // A, B, C...
-      btn.innerHTML = `<span class="choice-key">[${keyLabel}]</span> ${choice.text}`;
-      btn.addEventListener('click', () => makeChoice(choice));
+      btn.className = `choice-btn${choice.isAvailable ? '' : ' locked'}`;
+      btn.disabled = !choice.isAvailable;
+      const keyLabel = String.fromCharCode(65 + index);
+      btn.innerHTML = `
+        <span class="choice-key">[${keyLabel}]</span>
+        <span class="choice-copy">${choice.text}</span>
+        ${choice.isAvailable ? '' : `<span class="choice-lock-reason">${choice.gateReason}</span>`}
+        ${choice.fallbackUnlock ? '<span class="choice-lock-reason fallback-note">Fallback path opened to avoid a dead end.</span>' : ''}
+      `;
+      if (choice.isAvailable) {
+        btn.addEventListener('click', () => makeChoice(choice));
+      }
       dom.choicesArea.appendChild(btn);
     });
   }
 
-  function resolveChoices(choices) {
-    // Filter choices based on conditions (if any)
-    return choices.filter(choice => {
-      if (!choice.condition) return true;
-      return choice.condition(state.flags);
-    });
-  }
-
-  // --- Choice Handling ---
   function makeChoice(choice) {
-    // Record the choice
     state.choiceHistory.push({
       sceneId: state.currentScene,
       choiceId: choice.id,
       choiceText: choice.text,
     });
 
-    // Set any flags
-    if (choice.flag) {
-      state.flags[choice.flag] = true;
-    }
+    if (choice.flag) state.flags[choice.flag] = true;
 
-    // Determine next scene
     let nextScene = choice.next;
+    if (typeof nextScene === 'function') nextScene = nextScene(state.flags);
 
-    // Support dynamic next (function)
-    if (typeof nextScene === 'function') {
-      nextScene = nextScene(state.flags);
-    }
-
-    // Check if it's an ending
     if (nextScene.startsWith('ending_')) {
       showEnding(nextScene);
     } else {
@@ -170,7 +351,6 @@ const GameEngine = (() => {
     }
   }
 
-  // --- Endings ---
   function showEnding(endingId) {
     const ending = StoryData.endings[endingId];
     if (!ending) {
@@ -179,18 +359,38 @@ const GameEngine = (() => {
     }
 
     showScreen(dom.endingScreen);
+    hideMirrorPanel();
     dom.endingTitle.textContent = ending.title;
     dom.endingText.textContent = ending.text;
 
-    // Show choice summary
     let summary = '<h3>YOUR PATH</h3>';
-    state.choiceHistory.forEach(entry => {
+    state.choiceHistory.forEach((entry) => {
       summary += `<div>&gt; ${entry.choiceText}</div>`;
     });
     dom.endingSummary.innerHTML = summary;
   }
 
-  // --- Init ---
+  function resetState() {
+    state.currentScene = null;
+    state.choiceHistory = [];
+    state.flags = {};
+    state.chatPhaseActive = false;
+    state.currentGateId = null;
+    state.chatHistory = [];
+    state.analysisResultByGate = {};
+    state.mirrorBusy = false;
+    state.mirrorError = '';
+    hideMirrorPanel();
+  }
+
+  function formatTraitName(name) {
+    return name.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  function formatPersona(name) {
+    return name.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
   function init() {
     dom.startBtn.addEventListener('click', () => {
       resetState();
@@ -201,17 +401,20 @@ const GameEngine = (() => {
       resetState();
       showScreen(dom.titleScreen);
     });
+
+    dom.mirrorSendBtn.addEventListener('click', () => {
+      handleMirrorSend();
+    });
+
+    dom.mirrorInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleMirrorSend();
+      }
+    });
   }
 
-  function resetState() {
-    state.currentScene = null;
-    state.choiceHistory = [];
-    state.flags = {};
-  }
-
-  // Start the engine
   init();
 
-  // Public API (for debugging)
   return { state, renderScene };
 })();

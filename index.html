@@ -8,35 +8,56 @@
 </head>
 <body>
   <div id="game-container">
-    <!-- Title Screen -->
     <div id="title-screen">
       <div class="title-content">
         <h1 class="game-title">SNOW WHITE</h1>
         <p class="game-subtitle">A Tale Retold</p>
-        <p class="game-tagline">A prince in exile. Seven unlikely guardians. One poisoned truth.</p>
+        <p class="game-tagline">A prince in exile. Three unlikely guardians. One poisoned truth.</p>
         <button id="start-btn" class="btn-start">BEGIN THE TALE</button>
       </div>
     </div>
 
-    <!-- Game Screen -->
     <div id="game-screen" class="hidden">
-      <!-- Top Bar -->
       <div id="top-bar">
         <div id="scene-title"></div>
         <div id="scene-location"></div>
       </div>
 
-      <!-- Main Content -->
       <div id="narrative-area">
         <div id="character-label"></div>
         <div id="story-text"></div>
       </div>
 
-      <!-- Choices -->
+      <div id="mirror-panel" class="hidden">
+        <div class="mirror-panel-header">
+          <div>
+            <div class="mirror-eyebrow">LLM Character Gate</div>
+            <h3 id="mirror-gate-title">Mirror Interruption</h3>
+          </div>
+          <div id="mirror-status" class="mirror-status"></div>
+        </div>
+
+        <div id="mirror-chat-log" class="mirror-chat-log"></div>
+
+        <div class="mirror-input-row">
+          <textarea
+            id="mirror-input"
+            rows="3"
+            placeholder="Answer the Magic Mirror..."
+          ></textarea>
+          <button id="mirror-send-btn" class="btn-start mirror-send-btn">Speak</button>
+        </div>
+
+        <div id="mirror-judgment" class="mirror-judgment hidden">
+          <h4 id="mirror-persona"></h4>
+          <p id="mirror-reasoning"></p>
+          <div id="mirror-traits" class="mirror-traits"></div>
+        </div>
+      </div>
+
       <div id="choices-area"></div>
     </div>
 
-    <!-- Ending Screen -->
     <div id="ending-screen" class="hidden">
       <div class="ending-content">
         <h2 id="ending-title"></h2>
@@ -48,6 +69,8 @@
   </div>
 
   <script src="js/story.js"></script>
+  <script src="js/runtime-config.js"></script>
+  <script src="js/mirror.js"></script>
   <script src="js/engine.js"></script>
 </body>
 </html>
