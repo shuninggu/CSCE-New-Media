@@ -487,12 +487,14 @@ body {
 
 @media (max-width: 768px) {
   #game-container {
+    width: 100%;
     height: auto;
     min-height: 100vh;
-    align-items: stretch;
+    display: block;
   }
 
   #game-screen {
+    display: block;
     height: auto;
     min-height: 100vh;
     overflow-y: auto;
@@ -504,7 +506,9 @@ body {
   }
 
   #narrative-area {
+    flex: none;
     padding: 24px 24px 16px;
+    overflow: visible;
   }
 
   #mirror-panel {
@@ -512,6 +516,7 @@ body {
   }
 
   #choices-area {
+    max-width: none;
     padding: 0 24px 24px;
   }
 
