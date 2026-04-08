@@ -11,7 +11,8 @@ body {
   color: #d4c5a9;
   font-family: 'Crimson Text', serif;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 #game-container {
@@ -485,6 +486,18 @@ body {
 }
 
 @media (max-width: 768px) {
+  #game-container {
+    height: auto;
+    min-height: 100vh;
+    align-items: stretch;
+  }
+
+  #game-screen {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
   .game-title {
     font-size: 2.2rem;
     letter-spacing: 4px;
@@ -500,6 +513,10 @@ body {
 
   #choices-area {
     padding: 0 24px 24px;
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    transform: none;
   }
 
   .mirror-panel-header,
