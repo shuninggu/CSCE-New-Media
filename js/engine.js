@@ -141,6 +141,7 @@ const GameEngine = (() => {
     updateMirrorStatus('Speak with the Mirror. Five replies will trigger its judgment.');
     renderMirrorChat();
     showMirrorPanel();
+    MirrorLive2D.onMirrorOpen();
   }
 
   function showMirrorPanel() {
@@ -148,6 +149,7 @@ const GameEngine = (() => {
   }
 
   function hideMirrorPanel() {
+    MirrorLive2D.onMirrorClose();
     dom.mirrorPanel.classList.add('hidden');
     dom.mirrorJudgment.classList.add('hidden');
     dom.mirrorChatLog.innerHTML = '';
@@ -193,6 +195,7 @@ const GameEngine = (() => {
     }
 
     state.mirrorBusy = true;
+    MirrorLive2D.onThinking();
     dom.mirrorSendBtn.disabled = true;
     dom.mirrorInput.disabled = true;
     updateMirrorStatus('The Mirror studies your words...');
@@ -206,6 +209,7 @@ const GameEngine = (() => {
         conversation: state.chatHistory,
       });
       state.chatHistory.push({ role: 'assistant', content: nextQuestion.message });
+      MirrorLive2D.onResponse();
       if (nextQuestion.source === 'llm') {
         updateMirrorStatus('The Mirror answers with a brighter silver than before.');
       } else {
@@ -216,6 +220,7 @@ const GameEngine = (() => {
       state.mirrorError = 'The Mirror is silent. Falling back to its old riddles.';
       const fallbackQuestion = MirrorOracle.getFallbackQuestion(state.currentGateId, state.chatHistory);
       state.chatHistory.push({ role: 'assistant', content: fallbackQuestion });
+      MirrorLive2D.onResponse();
       updateMirrorStatus(state.mirrorError, true);
     } finally {
       state.mirrorBusy = false;
@@ -239,6 +244,7 @@ const GameEngine = (() => {
       });
       state.analysisResultByGate[state.currentGateId] = analysis;
       renderJudgment(analysis);
+      MirrorLive2D.onJudgment();
       state.chatPhaseActive = false;
       renderChoices(StoryData.scenes[state.currentScene]);
       if (analysis.source === 'llm') {
@@ -254,6 +260,7 @@ const GameEngine = (() => {
       });
       state.analysisResultByGate[state.currentGateId] = fallback;
       renderJudgment(fallback);
+      MirrorLive2D.onJudgment();
       state.chatPhaseActive = false;
       renderChoices(StoryData.scenes[state.currentScene]);
       updateMirrorStatus('Judgment complete via fallback analysis.', true);

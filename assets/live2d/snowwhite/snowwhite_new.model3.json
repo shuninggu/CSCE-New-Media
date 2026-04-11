@@ -1,0 +1,18 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "snowwhite_new.moc3",
+		"Textures": [
+			"snowwhite_new.1024/texture_00.png"
+		],
+		"Physics": "snowwhite_new.physics3.json",
+		"DisplayInfo": "snowwhite_new.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": []
+		}
+	]
+}
