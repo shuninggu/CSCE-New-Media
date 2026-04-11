@@ -125,21 +125,28 @@ CSCE-New-Media/
 ├── css/
 │   └── style.css       # Fantasy-themed dark UI (Cinzel + Crimson Text fonts)
 ├── js/
-│   ├── engine.js       # Game engine (state, scene transitions, Mirror gate flow)
-│   ├── mirror.js       # Magic Mirror chat + analysis + choice gating
-│   ├── runtime-config.js # Public Worker endpoint config
-│   └── story.js        # All story data (scenes, dialogue, choices, endings)
+│   ├── engine.js           # Game engine (state, scene transitions, Mirror gate flow)
+│   ├── live2d-integration.js # Live2D model renderer for the Magic Mirror panel
+│   ├── mirror.js           # Magic Mirror chat + analysis + choice gating
+│   ├── runtime-config.js   # Public Worker endpoint config
+│   ├── runtime-config.example.js # Template for runtime-config.js
+│   └── story.js            # All story data (scenes, dialogue, choices, endings)
+├── assets/
+│   └── live2d/
+│       └── snowwhite/      # Live2D Snow White model (moc3, physics, textures)
 ├── proxy/
 │   ├── cloudflare-worker.js # OpenRouter proxy for GitHub Pages
-│   └── wrangler.toml   # Worker config template
+│   ├── .dev.vars.example   # Local dev secrets template
+│   └── wrangler.toml       # Worker config template
 └── README.md
 ```
 
 ## Tech Stack
 
 - Pure HTML / CSS / JavaScript — no frameworks or build tools
+- Live2D Cubism SDK (via PIXI.js + pixi-live2d-display) for animated Mirror character
 - Typewriter text effect for immersion
-- Responsive design for desktop and mobile
+- Responsive design for desktop and mobile (mobile scrolling fix included)
 - Google Fonts: Cinzel (headings) + Crimson Text (body)
 
 ## Team
@@ -163,3 +170,7 @@ The current version adds a `Magic Mirror` chatbox before major branch points.
 - Trait thresholds lock or unlock later choices
 - The frontend is static and can run on GitHub Pages
 - The real LLM call should go through the Cloudflare Worker proxy in [`proxy/`](./proxy)
+
+## Live2D Integration
+
+The Magic Mirror panel renders an animated Snow White Live2D character (`assets/live2d/snowwhite/`), deployed with PIXI.js v7, pixi-live2d-display, and Live2D Cubism Core. Due to deployment issue, the animation is purely parameter-driven with four states: `idle`, `thinking`, `speaking` `judgment`.
